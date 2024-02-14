@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entry Form</title>
+    <!-- Optional: Include your CSS file here -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h1>Daily Log Entry</h1>
+    <form method="post">
+        <textarea name="daily_log" placeholder="Write your thoughts here..." required></textarea>
+        <input type="submit" value="Submit">
+    </form>
+    <!-- Optional: Include your JavaScript file here -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>

@@ -21,13 +21,15 @@ def create_app():
     login_manager.init_app(app)
     Migrate(app, db)  # Initialize migrate with app and db
     
-    from app.models import User  # Ensure User model is imported to define user_loader
-
-    @login_manager.user_loader
-    def load_user(user_id):
-        return User.query.get(int(user_id))
-
     from app.routes import main as main_blueprint
     app.register_blueprint(main_blueprint)
+    print(app.template_folder)
+
+    with app.app_context():
+        from app.models import User  # Ensure User model is imported to define user_loader
+
+        @login_manager.user_loader
+        def load_user(user_id):
+            return User.query.get(int(user_id))
 
     return app

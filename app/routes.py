@@ -4,8 +4,10 @@ from . import db, bcrypt  # Adjusted import for db and bcrypt
 from .forms import RegistrationForm, LoginForm, ProfileForm
 from .models import User
 from flask_login import logout_user
+from app.models import DailyLog
+from flask_login import current_user
 
-main = Blueprint('main', __name__)
+main = Blueprint('main', __name__ )
 
 @main.route('/')
 def home():
@@ -17,6 +19,9 @@ def logout():
     logout_user()
     flash('You have been logged out.', 'info')
     return redirect(url_for('main.home'))
+
+
+
 
 @main.route('/register', methods=['GET', 'POST'])
 def register():
@@ -58,6 +63,23 @@ def profile():
     elif request.method == 'GET':
         form.username.data = current_user.username
     return render_template('profile.html', title='Profile', form=form)
+
+@main.route('/entry', methods=['GET', 'POST'])
+def entry():
+    if request.method == 'POST':
+        daily_log_content = request.form['daily_log']
+        if current_user.is_authenticated:
+            user_id = current_user.id
+            new_entry = DailyLog(content=daily_log_content, user_id=user_id)
+            db.session.add(new_entry)
+            db.session.commit()
+            # Redirect to a page like the user's dashboard after saving the entry
+            return redirect(url_for('main.dashboard'))  
+        else:
+            flash('You need to login to submit entries.', 'warning')
+            return redirect(url_for('main.login'))
+    return render_template('entry_form.html')
+
 
 @main.route("/account")
 @login_required
