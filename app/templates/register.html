@@ -1,14 +1,51 @@
-<!-- templates/register.html -->
 {% extends "layout.html" %}
+
 {% block content %}
-    <div class="form">
-        <form method="POST" action="">
-            {{ form.hidden_tag() }}
-            <div>{{ form.username.label }}{{ form.username() }}</div>
-            <div>{{ form.email.label }}{{ form.email() }}</div>
-            <div>{{ form.password.label }}{{ form.password() }}</div>
-            <div>{{ form.confirm_password.label }}{{ form.confirm_password() }}</div>
-            <div>{{ form.submit() }}</div>
-        </form>
-    </div>
+<style>
+    .form {
+        max-width: 500px;
+        margin: 40px auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .form div {
+        margin-bottom: 15px;
+    }
+    .form label {
+        display: block;
+        margin-bottom: 5px;
+    }
+    .form input[type="text"],
+    .form input[type="email"],
+    .form input[type="password"],
+    .form input[type="submit"] {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    .form input[type="submit"] {
+        background-color: #007bff;
+        color: white;
+        cursor: pointer;
+    }
+    .form input[type="submit"]:hover {
+        background-color: #0056b3;
+    }
+</style>
+
+<div class="form">
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        <div>{{ form.username.label }}{{ form.username() }}</div>
+        <div>{{ form.email.label }}{{ form.email() }}</div>
+        <div>{{ form.password.label }}{{ form.password() }}</div>
+        <div>{{ form.confirm_password.label }}{{ form.confirm_password() }}</div>
+        <div>{{ form.submit() }}</div>
+    </form>
+</div>
 {% endblock %}
