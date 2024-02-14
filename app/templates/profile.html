@@ -1,17 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Update Profile</title>
-</head>
-<body>
-    <h1>Update Profile</h1>
-    <form method="POST">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-        <button type="submit">Update Profile</button>
-    </form>
-</body>
-</html>
+{% extends "layout.html" %}
+{% block content %}
+<h2>Profile Page</h2>
+<form method="POST" action="{{ url_for('main.profile') }}">
+    {{ form.hidden_tag() }}
+    <!-- Example form field -->
+    <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" class="form-control" name="username" id="username" value="{{ current_user.username }}">
+    </div>
+    <!-- Add other fields as necessary -->
+    <button type="submit" class="btn btn-primary">Update Profile</button>
+</form>
+{% endblock %}
