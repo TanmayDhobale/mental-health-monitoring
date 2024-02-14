@@ -2,4 +2,10 @@
 {% extends "layout.html" %}
 {% block content %}
 <h1>Welcome to the Mental Health Monitoring App</h1>
+{% if current_user.is_authenticated %}
+    <p>You are logged in. Access your entries below:</p>
+    <a href="{{ url_for('main.entry') }}" class="btn btn-primary">Go to Entry Page</a>
+{% else %}
+    <p>Please <a href="{{ url_for('main.login') }}">log in</a> or <a href="{{ url_for('main.register') }}">register</a> to access the entry page.</p>
+{% endif %}
 {% endblock %}
