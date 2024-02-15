@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Analysis</title>
+</head>
+<body>
+    <h1>Text Analysis for Mental Health</h1>
+    <form action="/analyze" method="post">
+        <textarea name="text" rows="10" cols="30" placeholder="Enter your text here..."></textarea>
+        <br>
+        <input type="submit" value="Analyze">
+    </form>
+    {% if analysis_results %}
+        <h2>Analysis Results</h2>
+        <p><strong>Sentiment:</strong> {{ analysis_results.sentiment }}</p>
+        <p><strong>Emotions:</strong>
+            <ul>
+                {% for emotion in analysis_results.emotions %}
+                    <li>{{ emotion[0] }}: {{ emotion[1] }}</li>
+                {% endfor %}
+            </ul>
+        </p>
+    {% endif %}
+</body>
+</html>

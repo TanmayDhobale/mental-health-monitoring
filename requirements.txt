@@ -2,3 +2,6 @@ Flask
 Flask-SQLAlchemy
 Flask-WTF
 Flask-Bcrypt
+spacy==3.0
+textblob==0.15.3
+nrclex==3.0.0

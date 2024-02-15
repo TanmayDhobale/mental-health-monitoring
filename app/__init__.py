@@ -1,35 +1,30 @@
-# __init__.py
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_migrate import Migrate
 
+# Initialize extensions
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 login_manager = LoginManager()
-login_manager.login_view = 'main.login'  # Adjusted to include blueprint name if needed
+login_manager.login_view = 'main.login'  # Ensure this points to the correct view
 login_manager.login_message_category = 'info'
 
 def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'your_secret_key'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
-
+    
+    # Initialize extensions with app context
     db.init_app(app)
     bcrypt.init_app(app)
     login_manager.init_app(app)
-    Migrate(app, db)  # Initialize migrate with app and db
+    Migrate(app, db)
     
-    from app.routes import main as main_blueprint
+# Import and register the Blueprints
+    from .routes import main as main_blueprint
     app.register_blueprint(main_blueprint)
-    print(app.template_folder)
 
-    with app.app_context():
-        from app.models import User  # Ensure User model is imported to define user_loader
-
-        @login_manager.user_loader
-        def load_user(user_id):
-            return User.query.get(int(user_id))
-
+    
     return app

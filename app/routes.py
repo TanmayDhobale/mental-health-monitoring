@@ -1,13 +1,13 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash
-from flask_login import login_user, login_required, current_user
-from . import db, bcrypt  # Adjusted import for db and bcrypt
+from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
+from . import db, bcrypt
 from .forms import RegistrationForm, LoginForm, ProfileForm
-from .models import User
-from flask_login import logout_user
-from app.models import DailyLog
-from flask_login import current_user
+from .models import User, DailyLog
+from flask_login import login_user, logout_user, login_required, current_user
+from .text_analysis import analyze_text, get_sentiment, analyze_emotion
+from .models import DailyLog
+from . import db
 
-main = Blueprint('main', __name__ )
+main = Blueprint('main', __name__)
 
 @main.route('/')
 def home():
@@ -74,14 +74,41 @@ def entry():
             db.session.add(new_entry)
             db.session.commit()
             # Redirect to a page like the user's dashboard after saving the entry
-            return redirect(url_for('main.dashboard'))  
+            return redirect(url_for('main.analyze'))  
         else:
             flash('You need to login to submit entries.', 'warning')
             return redirect(url_for('main.login'))
     return render_template('entry_form.html')
 
 
-@main.route("/account")
+@main.route('/dashboard')
 @login_required
-def account():
-    return render_template('account.html', title='Account')
+def dashboard():
+    user_id = current_user.id
+    daily_logs = DailyLog.query.filter_by(user_id=user_id).all()  # Fetch logs for current user
+    return render_template('dashboard.html', daily_logs=daily_logs)
+
+
+@main.route('/analyze', methods=['GET'])
+def analyze():
+    if request.method == 'POST':
+        text = request.form['text']
+        analysis_results = comprehensive_analysis(text)
+        return render_template('analyze.html', analysis_results=analysis_results)
+
+def get_sentiment(text):
+    blob = TextBlob(text)
+    return blob.sentiment.polarity
+
+def analyze_emotion(text):
+    emotion = NRCLex(text)
+    return emotion.top_emotions
+
+def comprehensive_analysis(text):
+    sentiment = get_sentiment(text)
+    emotions = analyze_emotion(text)
+    sentiment_text = "Positive" if sentiment > 0 else "Negative" if sentiment < 0 else "Neutral"
+    return {"sentiment": sentiment_text, "emotions": emotions}
+
+if __name__ == '__main__':
+    main.run(debug=True)

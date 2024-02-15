@@ -1,0 +1,15 @@
+<!-- dashboard.html -->
+{% extends  "layout.html"  %} <!-- Assuming you have a base template -->
+{% block content %}
+<h2>User Dashboard</h2>
+<div>
+    <h3>Your Daily Logs</h3>
+    <ul>
+        {% for log in daily_logs %}
+        <li>{{ log.created_at.strftime("%Y-%m-%d %H:%M:%S") }} - {{ log.content }}</li>
+        {% else %}
+        <li>No logs found</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
