@@ -3,16 +3,17 @@
 {% block content %}
 <h1>Welcome to the Mental Health Monitoring App</h1>
 {% if analysis_results %}
-    <div id="analysis-results">
-        <h2>Analysis Results</h2>
+    <div>
+        <h3>Analysis Results</h3>
         <p>Sentiment: {{ analysis_results.sentiment }}</p>
         <p>Top Emotion: {{ analysis_results.top_emotion }}</p>
-        <!-- Display more of your analysis results here -->
+        <!-- You can also iterate over emotions if you want to display all -->
     </div>
 {% endif %}
 {% if current_user.is_authenticated %}
     <p>You are logged in. Access your entries below:</p>
     <a href="{{ url_for('main.entry') }}" class="btn btn-primary">Go to Entry Page</a>
+        <a href="{{ url_for('main.analyze') }}" class="btn btn-primary">Go to text analysis Page</a>
 {% else %}
     <p>Please <a href="{{ url_for('main.login') }}">log in</a> or <a href="{{ url_for('main.register') }}">register</a> to access the entry page.</p>
 {% endif %}

@@ -1,27 +1,39 @@
-<!-- analyze.html -->
-{% extends "layout.html" %}
-{% block content %}
-<h2>Text Analysis</h2>
-<form id="analyze-form">
-    <textarea name="text" id="text" rows="4" placeholder="Enter text here..."></textarea>
-    <button type="submit">Analyze Text</button>
-</form>
-<div id="analysis-results"></div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Text Analysis</title>
+</head>
+<body>
+    <h1>Submit Text for Analysis</h1>
+    <form id="analyzeForm" method="post" action="/analyze">
+        <textarea name="text" rows="4" cols="50"></textarea>
+        <br>
+        <button type="submit">Analyze Text</button>
+    </form>
+    <div id="analysisResult"></div>
 
-<script>
-document.getElementById("analyze-form").onsubmit = async function(e) {
-    e.preventDefault();
-    const text = document.getElementById("text").value;
-    const response = await fetch('/analyze', {
-        method: 'POST', // This should be POST
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text: text }),
-    });
-    const data = await response.json();
-    document.getElementById("analysis-results").innerText = JSON.stringify(data, null, 2);
-    
-};
-</script>
-{% endblock %}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#analyzeForm').on('submit', function(e) {
+                e.preventDefault(); 
+                var formData = $(this).serialize();
+                
+                $.ajax({
+                    type: "POST",
+                    url: "/analyze",
+                    data: formData,
+                    success: function(response) {
+                        $('#analysisResult').html(`<p>Original Text: ${response.original}</p><p>Analyzed Text: ${response.analyzed}</p>`);
+                    },
+                    error: function(error) {
+                        console.log("Error:", error);
+                        $('#analysisResult').html(`<p>An error occurred</p>`);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

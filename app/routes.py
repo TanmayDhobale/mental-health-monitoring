@@ -12,27 +12,24 @@ from textblob import TextBlob
 from nrclex import NRCLex
 from collections import Counter
 
-
 main = Blueprint('main', __name__)
 nlp = spacy.load('en_core_web_sm')
 
 @main.route('/')
 def home():
+    return render_template('home.html')
+def home():
     analysis_results = None
     if 'analysis' in session:
         analysis_results = session['analysis']
-        # Clear the analysis result from the session if you don't want it to persist across multiple refreshes
-        session.pop('analysis', None)
     return render_template('home.html', analysis_results=analysis_results)
 
-
-
 @main.route('/logout')
+@login_required
 def logout():
     logout_user()
     flash('You have been logged out.', 'info')
     return redirect(url_for('main.home'))
-
 
 
 
@@ -80,22 +77,16 @@ def profile():
 @main.route('/entry', methods=['GET', 'POST'])
 def entry():
     if request.method == 'POST':
-        daily_log_content = request.form['daily_log']
-        print(f"Received text: {daily_log_content}")
-        if current_user.is_authenticated:
-            user_id = current_user.id
-            new_entry = DailyLog(content=daily_log_content, user_id=user_id)
-            db.session.add(new_entry)
-            db.session.commit()
-
-            # Perform text analysis here and store the results
+        daily_log_content = request.form.get('daily_log')
+        if daily_log_content:
             analysis_results = comprehensive_analysis(daily_log_content)
-            flash(analysis_results, 'analysis')
-
-            return redirect(url_for('main.home'))  
+            if analysis_results:  # Check if analysis_results is not None
+                flash(f"Analysis Complete. Sentiment: {analysis_results.get('sentiment', 'N/A')}, Top Emotion: {analysis_results.get('top_emotion', 'N/A')}")
+            else:
+                flash("Analysis failed. Please try again.")
+            return redirect(url_for('main.home'))
         else:
-            flash('You need to login to submit entries.', 'warning')
-            return redirect(url_for('main.login'))
+            flash('Please enter some text for analysis.', 'info')
     return render_template('entry_form.html')
 
 
@@ -106,52 +97,49 @@ def dashboard():
     daily_logs = DailyLog.query.filter_by(user_id=user_id).all()  # Fetch logs for current user
     return render_template('dashboard.html', daily_logs=daily_logs)
 
-
+def analyze_text(text):
+    doc = nlp(text)
+    for sentence in doc.sents:
+        print(f"Sentence: {sentence.text}")
+        for token in sentence:
+            print(f"{token.text} - POS: {token.pos_}, Lemma: {token.lemma_}")
+        for ent in sentence.ents:
+            print(f"Entity: {ent.text}, Type: {ent.label_}")
 
 
 def comprehensive_analysis(text):
-    sentiment_score = get_sentiment(text)
-    emotions = analyze_emotion(text)  # Ensure this is correctly implemented
-    
-    sentiment_text = "Positive" if sentiment_score > 0 else "Negative" if sentiment_score < 0 else "Neutral"
-    
-    # Filter emotions to only include those with a score greater than 0
-    filtered_emotions = {emotion: score for emotion, score in emotions.items() if score > 0}
-    top_emotion = max(filtered_emotions, key=filtered_emotions.get, default=None)
-    
+    try:
+        # Assuming your analysis might set these values based on the text
+        sentiment = get_sentiment(text)
+        top_emotion = analyze_emotion(text)
+        # Make sure the above functions return sensible defaults if their analysis fails
+    except Exception as e:
+        # Log the error or handle it appropriately
+        print(f"Error in text analysis: {e}")
+        return {'sentiment': 0, 'top_emotion': 'unknown'}  # Return default values in case of an error
+
     return {
-        "sentiment": sentiment_text,
-        "top_emotion": top_emotion,
-        "emotions": emotions
+        'sentiment': sentiment,
+        'top_emotion': top_emotion,
     }
 
 
+
 def get_sentiment(text):
-    print(f"Analyzing sentiment for: '{text}'")
     blob = TextBlob(text)
-    polarity = blob.sentiment.polarity
-    print(f"Sentiment polarity: {polarity}")
-    return polarity
+    sentiment = blob.sentiment.polarity  # -1 to 1 where -1 is negative and 1 is positive
+    return sentiment
 
 def analyze_emotion(text):
-    print(f"Analyzing emotion for: '{text}'")
-    text_object = NRCLex(text)
-    emotion_frequencies = text_object.affect_frequencies
-    print(f"Emotion frequencies: {emotion_frequencies}")
-    return emotion_frequencies
+    emotion = NRCLex(text)
+    return emotion.top_emotions
 
 @main.route('/analyze', methods=['GET', 'POST'])
 def analyze():
     if request.method == 'POST':
-        # Handle POST request
+        # Example of handling a form field named 'text'
         text = request.form.get('text', '')
-        if text:
-            analysis_results = comprehensive_analysis(text)
-            return render_template('analyze.html', analysis_results=analysis_results)
-        else:
-            # Handle case where 'text' is not provided or empty
-            flash('No text provided for analysis.', 'warning')
-            return redirect(url_for('main.entry'))
-    elif request.method == 'GET':
-        # Optionally handle GET request, if needed
-        return render_template('analyze.html')
+        # Placeholder for your analysis logic
+        analyzed_text = f"Analyzed version of {text}"
+        return jsonify({'original': text, 'analyzed': analyzed_text})
+    return render_template('analyze.html')
