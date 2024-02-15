@@ -3,15 +3,28 @@ from . import db, bcrypt
 from .forms import RegistrationForm, LoginForm, ProfileForm
 from .models import User, DailyLog
 from flask_login import login_user, logout_user, login_required, current_user
-from .text_analysis import analyze_text, get_sentiment, analyze_emotion
+from .text_analysis import analyze_text, get_sentiment, analyze_emotion  # Ensure these functions are correctly implemented
 from .models import DailyLog
 from . import db
+import spacy
+from flask import flash, session
+from textblob import TextBlob
+from nrclex import NRCLex
+from collections import Counter
+
 
 main = Blueprint('main', __name__)
+nlp = spacy.load('en_core_web_sm')
 
 @main.route('/')
 def home():
-    return render_template('home.html')
+    analysis_results = None
+    if 'analysis' in session:
+        analysis_results = session['analysis']
+        # Clear the analysis result from the session if you don't want it to persist across multiple refreshes
+        session.pop('analysis', None)
+    return render_template('home.html', analysis_results=analysis_results)
+
 
 
 @main.route('/logout')
@@ -68,13 +81,18 @@ def profile():
 def entry():
     if request.method == 'POST':
         daily_log_content = request.form['daily_log']
+        print(f"Received text: {daily_log_content}")
         if current_user.is_authenticated:
             user_id = current_user.id
             new_entry = DailyLog(content=daily_log_content, user_id=user_id)
             db.session.add(new_entry)
             db.session.commit()
-            # Redirect to a page like the user's dashboard after saving the entry
-            return redirect(url_for('main.analyze'))  
+
+            # Perform text analysis here and store the results
+            analysis_results = comprehensive_analysis(daily_log_content)
+            flash(analysis_results, 'analysis')
+
+            return redirect(url_for('main.home'))  
         else:
             flash('You need to login to submit entries.', 'warning')
             return redirect(url_for('main.login'))
@@ -89,26 +107,51 @@ def dashboard():
     return render_template('dashboard.html', daily_logs=daily_logs)
 
 
-@main.route('/analyze', methods=['GET'])
-def analyze():
-    if request.method == 'POST':
-        text = request.form['text']
-        analysis_results = comprehensive_analysis(text)
-        return render_template('analyze.html', analysis_results=analysis_results)
 
-def get_sentiment(text):
-    blob = TextBlob(text)
-    return blob.sentiment.polarity
-
-def analyze_emotion(text):
-    emotion = NRCLex(text)
-    return emotion.top_emotions
 
 def comprehensive_analysis(text):
-    sentiment = get_sentiment(text)
-    emotions = analyze_emotion(text)
-    sentiment_text = "Positive" if sentiment > 0 else "Negative" if sentiment < 0 else "Neutral"
-    return {"sentiment": sentiment_text, "emotions": emotions}
+    sentiment_score = get_sentiment(text)
+    emotions = analyze_emotion(text)  # Ensure this is correctly implemented
+    
+    sentiment_text = "Positive" if sentiment_score > 0 else "Negative" if sentiment_score < 0 else "Neutral"
+    
+    # Filter emotions to only include those with a score greater than 0
+    filtered_emotions = {emotion: score for emotion, score in emotions.items() if score > 0}
+    top_emotion = max(filtered_emotions, key=filtered_emotions.get, default=None)
+    
+    return {
+        "sentiment": sentiment_text,
+        "top_emotion": top_emotion,
+        "emotions": emotions
+    }
 
-if __name__ == '__main__':
-    main.run(debug=True)
+
+def get_sentiment(text):
+    print(f"Analyzing sentiment for: '{text}'")
+    blob = TextBlob(text)
+    polarity = blob.sentiment.polarity
+    print(f"Sentiment polarity: {polarity}")
+    return polarity
+
+def analyze_emotion(text):
+    print(f"Analyzing emotion for: '{text}'")
+    text_object = NRCLex(text)
+    emotion_frequencies = text_object.affect_frequencies
+    print(f"Emotion frequencies: {emotion_frequencies}")
+    return emotion_frequencies
+
+@main.route('/analyze', methods=['GET', 'POST'])
+def analyze():
+    if request.method == 'POST':
+        # Handle POST request
+        text = request.form.get('text', '')
+        if text:
+            analysis_results = comprehensive_analysis(text)
+            return render_template('analyze.html', analysis_results=analysis_results)
+        else:
+            # Handle case where 'text' is not provided or empty
+            flash('No text provided for analysis.', 'warning')
+            return redirect(url_for('main.entry'))
+    elif request.method == 'GET':
+        # Optionally handle GET request, if needed
+        return render_template('analyze.html')
