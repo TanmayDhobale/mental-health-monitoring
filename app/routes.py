@@ -31,8 +31,6 @@ def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('main.home'))
 
-
-
 @main.route('/register', methods=['GET', 'POST'])
 def register():
     form = RegistrationForm()
