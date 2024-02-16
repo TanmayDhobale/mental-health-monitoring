@@ -52,3 +52,7 @@ pip install -r requirements.txt
 # Instructions to run the app
 
 
+# License
+
+This project and its contents are proprietary software. Unauthorized copying, modification, distribution, and use of this software, via any medium, are strictly prohibited without the express permission of the copyright @tanmay4l.
+
