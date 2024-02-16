@@ -39,6 +39,11 @@ The Mental Health Monitoring App is a compassionate technological solution desig
 ### User Dashboard
 ![User Dashboard](https://github.com/TanmayDhobale/mental-health-monitoring/assets/89733575/24eb83e7-0f24-40b2-85e1-cfad99045131)
 
+### User Dashboard
+![Screenshot 2567-02-16 at 3 02 41 AM](https://github.com/TanmayDhobale/mental-health-monitoring/assets/89733575/24eb83e7-0f24-40b2-85e1-cfad99045131)
+
+
+
 ## Getting Started
 
 This section should provide instructions on how to clone, set up, and run your project locally.
@@ -50,8 +55,4 @@ cd [local repository]
 pip install -r requirements.txt
 # Instructions to run the app
 
-
-
-# User Dashboard
-![Screenshot 2567-02-16 at 3 02 41 AM](https://github.com/TanmayDhobale/mental-health-monitoring/assets/89733575/24eb83e7-0f24-40b2-85e1-cfad99045131)
 
