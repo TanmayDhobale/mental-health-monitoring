@@ -132,14 +132,25 @@ def get_sentiment(text):
 
 def analyze_emotion(text):
     emotion = NRCLex(text)
-    return emotion.top_emotions
+    emotion_dict = dict(emotion.affect_frequencies)  # Convert to dict if not already one
+    # Consider filtering or processing the emotion dictionary as needed
+    return emotion_dict
 
-@main.route('/analyze', methods=['GET', 'POST'])
+@main.route('/analyze')
 def analyze():
-    if request.method == 'POST':
-        # Example of handling a form field named 'text'
-        text = request.form.get('text', '')
-        # Placeholder for your analysis logic
-        analyzed_text = f"Analyzed version of {text}"
-        return jsonify({'original': text, 'analyzed': analyzed_text})
+    # Your code here
     return render_template('analyze.html')
+
+
+def comprehensive_analysis(text):
+    try:
+        sentiment_score = get_sentiment(text)
+        emotion_results = analyze_emotion(text)
+        top_emotion = max(emotion_results, key=emotion_results.get)  # Adjusted to get the key with the highest value
+        return {
+            'sentiment': sentiment_score,
+            'top_emotion': top_emotion,
+        }
+    except Exception as e:
+        print(f"Error in text analysis: {e}")
+        return {'sentiment': 0, 'top_emotion': 'unknown'}

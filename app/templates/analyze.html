@@ -25,7 +25,8 @@
                     url: "/analyze",
                     data: formData,
                     success: function(response) {
-                        $('#analysisResult').html(`<p>Original Text: ${response.original}</p><p>Analyzed Text: ${response.analyzed}</p>`);
+                       $('#analysisResult').html(`<p>Original Text: ${response.original}</p><p>Polarity: ${response.polarity}</p><p>Subjectivity: ${response.subjectivity}</p><p>Analysis: ${response.analysis}</p>`);
+
                     },
                     error: function(error) {
                         console.log("Error:", error);
